@@ -47,9 +47,20 @@ class MainWindow(Gtk.Application):
         self.add_window(self.window)
         self.window.show()
 
+    def refresh_views(self):
+        """
+        Refresh the docker interface object and the reload the ListViews
+        to get a fresh snapshot of the system
+        """
+        print "Not Implemented: refresh_views"
+
+    # Events and "natural" callbacks
+
     def on_MainWindow_delete_event(self, obj, event = None):
         "on_MainWindow_delete_event activated"
         print 'on_MainWindow_delete_event activated'
+
+    # Action callbacks
 
     def on_connect_action_activate(self, obj, event = None):
         """
@@ -64,6 +75,70 @@ class MainWindow(Gtk.Application):
             # FIXME: Show a nicer message with a MessageBox
             print u"Error connecting to Docker Server: " + unicode(e)
             self.docker = None
+
+    def on_preferences_action_activate(self, obj, event = None):
+        """
+        We've been asked for the preferences window
+        """
+        # TODO
+        print "Not implemented: on_preferences_action_activate"
+
+    def on_refresh_action_activate(self, obj, event = None):
+        """
+        The user wants to reload the listings
+        """
+        print "on_refresh_action_activate"
+        self.refresh_views()
+
+    def on_start_action_activate(self, obj, event = None):
+        """
+        The user demands a certain container to be started
+        """
+        print "Not implemented: on_start_action_activate"
+
+    def on_stop_action_activate(self, obj, event = None):
+        """
+        The user wants to stop a certain container
+        """
+        # TODO: Remember to show a warning and a yes-no choice before proceeding!
+        print "Not implemented: on_stop_action_activate"
+
+    def on_attach_action_activate(self, obj, event = None):
+        """
+        Here we're requested to attach to a running container
+        """
+        # TODO: We should launch $TERM with the attach command
+        # if the container is running. If not, we display an error or warning
+        # Maybe offer the option to start it and then attach?
+        print "Not implemented: on_attach_action_activate"
+
+    def on_log_action_activate(self, obj, event = None):
+        """
+        User wants to see the log output of a certain container
+        """
+        # TODO: We should launch $TERM with the log command and the -f option
+        # unless it is not running, where we remove the -f option and launch it 
+        # anyway.
+        print "Not implemented: on_log_action_activate"
+
+    def on_build_action_activate(self, obj, event = None):
+        """
+        Command for building new images from Dockerfiles
+        """
+        # TODO: Open a OpenFileDialog and build the image.
+        print "Not implemented: on_build_action_activate"
+
+    def on_remove_image_action_activate(self, obj, event = None):
+        """
+        We've been asked to remove an existing image
+        """
+        print "Not implemented: on_remove_image_action_activate"
+
+    def on_runimage_action_activate(self, obj, event = None):
+        """
+        Launch selected image into a running container
+        """
+        print "Not implemented: on_runimage_action_activate"
 
 
 # run main loop
