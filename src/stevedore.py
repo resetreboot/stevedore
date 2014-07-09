@@ -20,6 +20,7 @@
 
 from gi.repository import Gtk, Gio
 from pkg_resources import resource_string
+from docker_iface import DockerInterface, DockerImage, DockerContainer
 
 
 class MainWindow(Gtk.Application):
@@ -41,29 +42,28 @@ class MainWindow(Gtk.Application):
         # connect handlers
         self.builder.connect_signals(self)
 
-        # widgets
+        # Add window to the App and show it
         self.window = self.builder.get_object('MainWindow')
         self.add_window(self.window)
         self.window.show()
 
-        # Remember to add your Gtk.Window to the object with self.add_window(my_gtk_window)
+    def on_MainWindow_delete_event(self, obj, event = None):
+        "on_MainWindow_delete_event activated"
+        print 'on_MainWindow_delete_event activated'
 
-        # signal handlers
-        # def on_action_save_activate(self, obj, event = None):
-        #     "on_action_save_activate activated"
-        #     print 'on_action_save_activate activated'
+    def on_connect_action_activate(self, obj, event = None):
+        """
+        Connection action has been triggered
+        """
+        # TODO: Get the parameters from configuration
+        try:
+            self.docker = DockerInterface()
+            self.refresh_views()
 
-        # def on_action_record_activate(self, obj, event = None):
-        #     "on_action_record_activate activated"
-        #     print 'on_action_record_activate activated'
-
-        # def on_MainWindow_delete_event(self, obj, event = None):
-        #     "on_MainWindow_delete_event activated"
-        #     print 'on_MainWindow_delete_event activated'
-
-        # def on_SaveWindow_delete_event(self, obj, event = None):
-        #     "on_SaveWindow_delete_event activated"
-        #     print 'on_SaveWindow_delete_event activated'
+        except Exception as e:
+            # FIXME: Show a nicer message with a MessageBox
+            print u"Error connecting to Docker Server: " + unicode(e)
+            self.docker = None
 
 
 # run main loop
