@@ -202,3 +202,11 @@ class DockerInterface(object):
 
             container_object.status_from_string(container['Status'])
             self.containers.append(container_object)
+
+    def build(self, path, tag):
+        """
+        Creates a new docker image from a Dockerfile in the specified path
+        """
+        self.client.build(path = path, tag = tag)
+        self.update_images()
+        self.update_containers()
