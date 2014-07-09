@@ -19,6 +19,8 @@
 # glade2py script can be found at hocr web site http://hocr.berlios.de
 
 from gi.repository import Gtk, Gio
+from pkg_resources import resource_string
+
 
 class MainWindow(Gtk.Application):
     def __init__(self):
@@ -30,31 +32,38 @@ class MainWindow(Gtk.Application):
         
         # create widget tree ...
         self.builder = Gtk.Builder()
-        self.builder.add_from_file('/usr/share/stevedore/stevedore.glade')
+        try:
+            self.builder.add_from_file(resource_string(__name__, 'stevedore.glade'))
+
+        except:
+            self.builder.add_from_file('../res/stevedore.glade')
 
         # connect handlers
         self.builder.connect_signals(self)
 
         # widgets
+        self.window = self.builder.get_object('MainWindow')
+        self.add_window(self.window)
+        self.window.show()
 
         # Remember to add your Gtk.Window to the object with self.add_window(my_gtk_window)
 
-    # signal handlers
-    def on_action_save_activate(self, obj, event = None):
-        "on_action_save_activate activated"
-        print 'on_action_save_activate activated'
+        # signal handlers
+        # def on_action_save_activate(self, obj, event = None):
+        #     "on_action_save_activate activated"
+        #     print 'on_action_save_activate activated'
 
-    def on_action_record_activate(self, obj, event = None):
-        "on_action_record_activate activated"
-        print 'on_action_record_activate activated'
+        # def on_action_record_activate(self, obj, event = None):
+        #     "on_action_record_activate activated"
+        #     print 'on_action_record_activate activated'
 
-    def on_MainWindow_delete_event(self, obj, event = None):
-        "on_MainWindow_delete_event activated"
-        print 'on_MainWindow_delete_event activated'
+        # def on_MainWindow_delete_event(self, obj, event = None):
+        #     "on_MainWindow_delete_event activated"
+        #     print 'on_MainWindow_delete_event activated'
 
-    def on_SaveWindow_delete_event(self, obj, event = None):
-        "on_SaveWindow_delete_event activated"
-        print 'on_SaveWindow_delete_event activated'
+        # def on_SaveWindow_delete_event(self, obj, event = None):
+        #     "on_SaveWindow_delete_event activated"
+        #     print 'on_SaveWindow_delete_event activated'
 
 
 # run main loop
