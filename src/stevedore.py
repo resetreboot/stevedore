@@ -46,8 +46,11 @@ class MainWindow(Gtk.Application):
 
         # Add window to the App and show it
         self.window = self.builder.get_object('MainWindow')
+        self.status_bar = self.builder.get_object('AppStatus')
+        self.status_context_id = self.status_bar.get_context_id('main_app')
         self.add_window(self.window)
         self.window.show()
+        self.set_app_status(u'Not connected to Docker server.')
 
     def refresh_views(self, refresh_iface = True):
         """
@@ -106,27 +109,47 @@ class MainWindow(Gtk.Application):
                 return final_format % locals()
         return final_format % dict(symbol = symbols[0], value = size_in_bytes)
 
+    def set_app_status(self, message):
+        """
+        Shows the current application status in the status bar
+        """
+        try:
+            self.status_bar.pop(self.status_context_id)
+
+        except:
+            pass
+
+        self.status_bar.push(self.status_context_id, message)
+
     # Events and "natural" callbacks
 
     def on_MainWindow_delete_event(self, obj, event = None):
-        "on_MainWindow_delete_event activated"
-        print 'on_MainWindow_delete_event activated'
+        """
+        The main window is deleted
+        """
+        pass
 
-    # Action callbacks
+    ### Action callbacks ###
 
     def on_connect_action_activate(self, obj, event = None):
         """
         Connection action has been triggered
         """
         # TODO: Get the parameters from configuration
-        # try:
-        self.docker = DockerInterface()
-        self.refresh_views(refresh_iface = False)
+        try:
+            self.set_app_status(u"Connecting to Docker server...")
+            self.docker = DockerInterface()
 
-        # except Exception as e:
-        #     # FIXME: Show a nicer message with a MessageBox
-        #     print u"Error connecting to Docker Server: " + unicode(e)
-        #     self.docker = None
+        except Exception as e:
+            # FIXME: Show a nicer message with a MessageBox
+            self.set_app_status(u"Error connecting to Docker Server: " + unicode(e))
+            self.docker = None
+
+            return
+
+        self.set_app_status(u"Connected to Docker server successfully. Fetching container and image data.")
+        self.refresh_views(refresh_iface = False)
+        self.set_app_status(u"Connected to Docker server.")
 
     def on_preferences_action_activate(self, obj, event = None):
         """
@@ -139,7 +162,6 @@ class MainWindow(Gtk.Application):
         """
         The user wants to reload the listings
         """
-        print "on_refresh_action_activate"
         self.refresh_views()
 
     def on_start_action_activate(self, obj, event = None):
