@@ -2,7 +2,18 @@
 <!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
-  <object class="GtkListStore" id="ContainerList"/>
+  <object class="GtkListStore" id="ContainerList">
+    <columns>
+      <!-- column-name Name -->
+      <column type="gchararray"/>
+      <!-- column-name Image -->
+      <column type="gchararray"/>
+      <!-- column-name ContainerID -->
+      <column type="gchararray"/>
+      <!-- column-name Status -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkImage" id="FileStockImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -18,7 +29,20 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-jump-to</property>
   </object>
-  <object class="GtkListStore" id="ImagesListStore"/>
+  <object class="GtkListStore" id="ImagesList">
+    <columns>
+      <!-- column-name Repository -->
+      <column type="gchararray"/>
+      <!-- column-name Tag -->
+      <column type="gchararray"/>
+      <!-- column-name Size -->
+      <column type="gchararray"/>
+      <!-- column-name Virtual -->
+      <column type="gchararray"/>
+      <!-- column-name Created -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkImage" id="PlayStockImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -111,6 +135,7 @@
             <property name="can_focus">True</property>
             <child>
               <object class="GtkToolButton" id="ToolConnect">
+                <property name="use_action_appearance">True</property>
                 <property name="related_action">connect_action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -127,6 +152,7 @@
             </child>
             <child>
               <object class="GtkToolButton" id="Refresh">
+                <property name="use_action_appearance">True</property>
                 <property name="related_action">refresh_action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -152,6 +178,7 @@
             </child>
             <child>
               <object class="GtkToolButton" id="Preferences">
+                <property name="use_action_appearance">True</property>
                 <property name="related_action">preferences_action</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -198,7 +225,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">start_action</property>
                         <property name="image">PlayStockImage</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -216,7 +242,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">stop_action</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -234,7 +259,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">attach_action</property>
                         <property name="image">GoToStockImage</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -252,7 +276,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">log_action</property>
                         <property name="image">FileStockImage</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -280,8 +303,61 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">ContainerList</property>
+                        <property name="search_column">0</property>
+                        <property name="show_expanders">False</property>
+                        <property name="enable_grid_lines">both</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview-selection1"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ContainerName">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Name</property>
+                            <property name="clickable">True</property>
+                            <property name="sort_column_id">0</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ContainerNameText"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ContainerImage">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Image</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ContainerImageText"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ContainerID">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">ID</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ContainerIDText"/>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ContainerStatus">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Status</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="ContainerStatusText"/>
+                              <attributes>
+                                <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                     </child>
@@ -328,7 +404,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">build_action</property>
                         <property name="image">GearStockImage</property>
                         <property name="yalign">0.61000001430511475</property>
                         <property name="always_show_image">True</property>
@@ -347,7 +422,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">remove_image_action</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -365,7 +439,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="action_name">runimage_action</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
                       </object>
@@ -391,9 +464,74 @@
                       <object class="GtkTreeView" id="ImagesListView">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">ImagesListStore</property>
+                        <property name="model">ImagesList</property>
+                        <property name="search_column">0</property>
+                        <property name="enable_grid_lines">both</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview-selection2"/>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ImagesRepo">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Repository</property>
+                            <property name="clickable">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="RepositoryText"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ImageTag">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Tag</property>
+                            <property name="clickable">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="TagText"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ImageSize">
+                            <property name="title" translatable="yes">Size</property>
+                            <property name="clickable">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="SizeText"/>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ImageVirtualSize">
+                            <property name="resizable">True</property>
+                            <property name="title" translatable="yes">Virtual Size</property>
+                            <property name="clickable">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="VirtualSizeText"/>
+                              <attributes>
+                                <attribute name="text">3</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="ImageCreated">
+                            <property name="title" translatable="yes">Created</property>
+                            <property name="clickable">True</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="CreatedText"/>
+                              <attributes>
+                                <attribute name="text">4</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                     </child>

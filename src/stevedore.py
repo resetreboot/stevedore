@@ -20,7 +20,9 @@
 
 from gi.repository import Gtk, Gio
 from pkg_resources import resource_string
-from docker_iface import DockerInterface, DockerImage, DockerContainer
+from docker_iface import DockerInterface, DockerImage, DockerContainer, DockerNotConnectedException
+
+import time
 
 
 class MainWindow(Gtk.Application):
@@ -47,12 +49,62 @@ class MainWindow(Gtk.Application):
         self.add_window(self.window)
         self.window.show()
 
-    def refresh_views(self):
+    def refresh_views(self, refresh_iface = True):
         """
         Refresh the docker interface object and the reload the ListViews
         to get a fresh snapshot of the system
         """
-        print "Not Implemented: refresh_views"
+        # If we have to refresh the Docker interface, we do so
+        if refresh_iface:
+            self.docker.update_images()
+            self.docker.update_containers()
+
+        # Fetch the lists
+        container_view = self.builder.get_object('ContainerListView')
+        images_view = self.builder.get_object('ImagesListView')
+
+        container_list = container_view.get_model()
+        image_list = images_view.get_model()
+
+        # Clear them all
+        container_list.clear()
+        image_list.clear()
+
+        # And now we populate them back
+        for container in self.docker.containers:
+            status = container.return_status_string()
+            container_list.append(row = [container.names[0],
+                                         unicode(container.image),
+                                         unicode(container.container_id)[:12],
+                                         status])
+
+        for image in self.docker.images:
+            size_text = self.size_to_human(image.size)
+            virtual_size_text = self.size_to_human(image.virtual_size)
+            human_date = time.ctime(int(image.created))
+            image_list.append(row = [image.repository,
+                                     image.tag,
+                                     size_text,
+                                     virtual_size_text,
+                                     unicode(human_date)])
+
+    def size_to_human(self, size_in_bytes):
+        """
+        Transforms the size given in bytes to a human readable form, appending
+        the units and making it a more manageable size
+
+        Modified from this: http://stackoverflow.com/questions/13343700/bytes-to-human-readable-and-back-without-data-loss
+        """
+        final_format = u"%(value).2f %(symbol)s"
+        symbols = (u'B', u'Kb', u'Mb', u'Gb', u'Tb', u'Pb', u'Eb', u'Zb', u'Yb')
+        prefix = {}
+        for i, s in enumerate(symbols[1:]):
+            prefix[s] = 1 << (i+1)*10
+        for symbol in reversed(symbols[1:]):
+            if size_in_bytes >= prefix[symbol]:
+                value = float(size_in_bytes) / prefix[symbol]
+                return final_format % locals()
+        return final_format % dict(symbol = symbols[0], value = size_in_bytes)
 
     # Events and "natural" callbacks
 
@@ -67,14 +119,14 @@ class MainWindow(Gtk.Application):
         Connection action has been triggered
         """
         # TODO: Get the parameters from configuration
-        try:
-            self.docker = DockerInterface()
-            self.refresh_views()
+        # try:
+        self.docker = DockerInterface()
+        self.refresh_views(refresh_iface = False)
 
-        except Exception as e:
-            # FIXME: Show a nicer message with a MessageBox
-            print u"Error connecting to Docker Server: " + unicode(e)
-            self.docker = None
+        # except Exception as e:
+        #     # FIXME: Show a nicer message with a MessageBox
+        #     print u"Error connecting to Docker Server: " + unicode(e)
+        #     self.docker = None
 
     def on_preferences_action_activate(self, obj, event = None):
         """

@@ -161,8 +161,13 @@ class DockerInterface(object):
                  docker_url = 'unix://var/run/docker.sock', 
                  connect_timeout = 10):
         # Connect to the docker server, if this fails we let it go up
-        self.client = docker.Client(base_url = docker_url, 
-                                    timeout = connect_timeout)
+        try:
+            self.client = docker.Client(base_url = docker_url, 
+                                        timeout = connect_timeout)
+
+        except Exception as e:
+            self.client = None
+            raise e
 
         # Since we're connected, let's get all the containers and images available
         self.update_images()
@@ -174,39 +179,55 @@ class DockerInterface(object):
         it in ourselves for future reference.
         """
         self.images = []
-        img_list = self.client.images()
-        for img_info in img_list:
-            for repo_tags in img_info['RepoTags']:
-                repository_and_tags = repo_tags.split(':')
-                docker_image = DockerImage(repository = repository_and_tags[0],
-                                           tag = repository_and_tags[1],
-                                           img_id = img_info['Id'],
-                                           created = img_info['Created'],
-                                           size = img_info['Size'],
-                                           virtual_size = img_info['VirtualSize'])
+        if self.client is not None:
+            img_list = self.client.images()
+            for img_info in img_list:
+                for repo_tags in img_info['RepoTags']:
+                    repository_and_tags = repo_tags.split(':')
+                    docker_image = DockerImage(repository = repository_and_tags[0],
+                                               tag = repository_and_tags[1],
+                                               img_id = img_info['Id'],
+                                               created = img_info['Created'],
+                                               size = img_info['Size'],
+                                               virtual_size = img_info['VirtualSize'])
 
-                self.images.append(docker_image)
+                    self.images.append(docker_image)
+
+        else:
+            raise DockerNotConnectedException()
 
     def update_containers(self):
         """
         Ask our docker server the containers created and their status
         """
         self.containers = []
-        containers = self.client.containers(all = True)
-        for container in containers:
-            container_object = DockerContainer(container_id = container['Id'],
-                                               image = container['Image'],
-                                               command = container['Command'],
-                                               created = container['Created'],
-                                               names = container['Names'])
+        if self.client is not None:
+            containers = self.client.containers(all = True)
+            for container in containers:
+                container_object = DockerContainer(container_id = container['Id'],
+                                                   image = container['Image'],
+                                                   command = container['Command'],
+                                                   created = container['Created'],
+                                                   names = container['Names'])
 
-            container_object.status_from_string(container['Status'])
-            self.containers.append(container_object)
+                container_object.status_from_string(container['Status'])
+                self.containers.append(container_object)
+
+        else:
+            raise DockerNotConnectedException()
 
     def build(self, path, tag):
         """
         Creates a new docker image from a Dockerfile in the specified path
         """
-        self.client.build(path = path, tag = tag)
-        self.update_images()
-        self.update_containers()
+        if self.client is not None:
+            self.client.build(path = path, tag = tag)
+            self.update_images()
+            self.update_containers()
+
+        else:
+            raise DockerNotConnectedException()
+
+
+class DockerNotConnectedException(Exception):
+    pass
