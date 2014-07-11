@@ -70,40 +70,50 @@ class MainWindow(Gtk.Application):
         to get a fresh snapshot of the system
         """
         # If we have to refresh the Docker interface, we do so
-        if refresh_iface:
-            self.docker.update_images()
-            self.docker.update_containers()
+        if hasattr(self, 'docker') and self.docker is not None:
+            if refresh_iface:
+                self.docker.update_images()
+                self.docker.update_containers()
 
-        # Fetch the lists
-        container_view = self.builder.get_object('ContainerListView')
-        images_view = self.builder.get_object('ImagesListView')
+            # Fetch the lists
+            container_view = self.builder.get_object('ContainerListView')
+            images_view = self.builder.get_object('ImagesListView')
 
-        container_list = container_view.get_model()
-        image_list = images_view.get_model()
+            container_list = container_view.get_model()
+            image_list = images_view.get_model()
 
-        # Clear them all
-        container_list.clear()
-        image_list.clear()
+            # Clear them all
+            container_list.clear()
+            image_list.clear()
 
-        # And now we populate them back
-        for container_index in self.docker.containers:
-            container = self.docker.get_container_by_id(container_index)
-            status = container.return_status_string()
-            container_list.append(row = [container.names[0],
-                                         unicode(container.image),
-                                         unicode(container.container_id)[:12],
-                                         status,
-                                         unicode(container.container_id)])
+            # And now we populate them back
+            for container_index in self.docker.containers:
+                container = self.docker.get_container_by_id(container_index)
+                status = container.return_status_string()
+                container_list.append(row = [container.names[0],
+                                             unicode(container.image),
+                                             unicode(container.container_id)[:12],
+                                             status,
+                                             unicode(container.container_id)])
 
-        for image in self.docker.images:
-            size_text = self.size_to_human(image.size)
-            virtual_size_text = self.size_to_human(image.virtual_size)
-            human_date = time.ctime(int(image.created))
-            image_list.append(row = [image.repository,
-                                     image.tag,
-                                     size_text,
-                                     virtual_size_text,
-                                     unicode(human_date)])
+            for image in self.docker.images:
+                size_text = self.size_to_human(image.size)
+                virtual_size_text = self.size_to_human(image.virtual_size)
+                human_date = time.ctime(int(image.created))
+                image_list.append(row = [image.repository,
+                                         image.tag,
+                                         size_text,
+                                         virtual_size_text,
+                                         unicode(human_date)])
+
+        else:
+            self.set_app_status("Not connected to Docker server.")
+            message_dialog = Gtk.MessageDialog(self.window, 0, 
+                                               Gtk.MessageType.INFO,
+                                               Gtk.ButtonsType.OK,
+                                               u"First connect to a Docker server.")
+            message_dialog.run()
+            message_dialog.destroy()
 
     def size_to_human(self, size_in_bytes):
         """
@@ -115,12 +125,16 @@ class MainWindow(Gtk.Application):
         final_format = u"%(value).2f %(symbol)s"
         symbols = (u'B', u'Kb', u'Mb', u'Gb', u'Tb', u'Pb', u'Eb', u'Zb', u'Yb')
         prefix = {}
+
         for i, s in enumerate(symbols[1:]):
             prefix[s] = 1 << (i+1)*10
+
         for symbol in reversed(symbols[1:]):
             if size_in_bytes >= prefix[symbol]:
                 value = float(size_in_bytes) / prefix[symbol]
+
                 return final_format % locals()
+
         return final_format % dict(symbol = symbols[0], value = size_in_bytes)
 
     def set_app_status(self, message):
@@ -156,7 +170,13 @@ class MainWindow(Gtk.Application):
 
         except Exception as e:
             # FIXME: Show a nicer message with a MessageBox
-            self.set_app_status(u"Error connecting to Docker Server: " + unicode(e))
+            self.set_app_status(u"Error connecting to Docker Server.")
+            message_dialog = Gtk.MessageDialog(self.window, 0, 
+                                               Gtk.MessageType.ERROR,
+                                               Gtk.ButtonsType.OK,
+                                               u"Error connecting to Docker Server:\n {ExceptionMessage}".format(ExceptionMessage = unicode(e)))
+            message_dialog.run()
+            message_dialog.destroy()
             self.docker = None
 
             return
@@ -225,7 +245,7 @@ class MainWindow(Gtk.Application):
                 message_dialog = Gtk.MessageDialog(self.window, 0, 
                                                    Gtk.MessageType.QUESTION,
                                                    Gtk.ButtonsType.YES_NO,
-                                                   "Are you sure you want to remove {name} container?".format(name = container.names[0]))
+                                                   u"Are you sure you want to remove {name} container?".format(name = container.names[0]))
                 response = message_dialog.run()
                 if response == Gtk.ResponseType.YES:
                     self.docker.remove_container(container.container_id)
