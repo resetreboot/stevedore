@@ -60,7 +60,7 @@ class DockerContainer(object):
         self.command = command
         self.created = created
         self.names = self.filter_names(names)
-        self.status = "Unknown"
+        self.status = DockerContainer.UNKNOWN
         self.time_elapsed = 0
         self.ports = []
 
@@ -200,7 +200,7 @@ class DockerInterface(object):
         """
         Ask our docker server the containers created and their status
         """
-        self.containers = []
+        self.containers = dict()
         if self.client is not None:
             containers = self.client.containers(all = True)
             for container in containers:
@@ -211,10 +211,20 @@ class DockerInterface(object):
                                                    names = container['Names'])
 
                 container_object.status_from_string(container['Status'])
-                self.containers.append(container_object)
+                self.containers[container['Id']] = container_object
 
         else:
             raise DockerNotConnectedException()
+
+
+    def get_container_by_id(self, container_id):
+        """
+        Returns the container that matched container_id
+        """
+        if self.client is None:
+            raise DockerNotConnectedException()
+
+        return self.containers.get(container_id, None)
 
     def build(self, path, tag):
         """

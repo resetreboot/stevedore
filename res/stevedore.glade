@@ -2,6 +2,54 @@
 <!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
+  <object class="GtkActionGroup" id="ContainerActionGroup">
+    <child>
+      <object class="GtkAction" id="start_action">
+        <property name="label" translatable="yes">Start</property>
+        <property name="short_label" translatable="yes">Start</property>
+        <property name="tooltip" translatable="yes">Start a selected stopped container.</property>
+        <property name="stock_id">gtk-media-play</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_start_action_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="stop_action">
+        <property name="label" translatable="yes">Stop</property>
+        <property name="short_label" translatable="yes">Stop</property>
+        <property name="stock_id">gtk-media-stop</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_stop_action_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="attach_action">
+        <property name="label" translatable="yes">Attach</property>
+        <property name="short_label" translatable="yes">Attach</property>
+        <property name="stock_id">gtk-jump-to</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_attach_action_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="log_action">
+        <property name="label" translatable="yes">Log</property>
+        <property name="short_label" translatable="yes">Log</property>
+        <property name="stock_id">gtk-file</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_log_action_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="delete_container_action">
+        <property name="label" translatable="yes">Delete</property>
+        <property name="short_label" translatable="yes">Delete</property>
+        <property name="tooltip" translatable="yes">Delete the selected container.</property>
+        <property name="stock_id">gtk-delete</property>
+        <property name="always_show_image">True</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="ContainerList">
     <columns>
       <!-- column-name Name -->
@@ -11,6 +59,8 @@
       <!-- column-name ContainerID -->
       <column type="gchararray"/>
       <!-- column-name Status -->
+      <column type="gchararray"/>
+      <!-- column-name FullID -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -28,6 +78,35 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-jump-to</property>
+  </object>
+  <object class="GtkActionGroup" id="ImagesActionGroup">
+    <child>
+      <object class="GtkAction" id="build_action">
+        <property name="label" translatable="yes">Build</property>
+        <property name="short_label" translatable="yes">Build</property>
+        <property name="stock_id">gtk-properties</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_build_action_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="runimage_action">
+        <property name="label" translatable="yes">Run</property>
+        <property name="short_label" translatable="yes">Run</property>
+        <property name="stock_id">gtk-execute</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_runimage_action_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="remove_image_action">
+        <property name="label" translatable="yes">Remove</property>
+        <property name="short_label" translatable="yes">Remove</property>
+        <property name="stock_id">gtk-delete</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_remove_image_action_activate" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="ImagesList">
     <columns>
@@ -48,33 +127,12 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-media-play</property>
   </object>
-  <object class="GtkAction" id="attach_action">
-    <property name="label" translatable="yes">Attach</property>
-    <property name="short_label" translatable="yes">Attach</property>
-    <property name="stock_id">gtk-jump-to</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_attach_action_activate" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="build_action">
-    <property name="label" translatable="yes">Build</property>
-    <property name="short_label" translatable="yes">Build</property>
-    <property name="stock_id">gtk-properties</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_build_action_activate" swapped="no"/>
-  </object>
   <object class="GtkAction" id="connect_action">
     <property name="label" translatable="yes">Connect</property>
     <property name="short_label" translatable="yes">Connect</property>
     <property name="stock_id">gtk-connect</property>
     <property name="always_show_image">True</property>
     <signal name="activate" handler="on_connect_action_activate" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="log_action">
-    <property name="label" translatable="yes">Log</property>
-    <property name="short_label" translatable="yes">Log</property>
-    <property name="stock_id">gtk-file</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_log_action_activate" swapped="no"/>
   </object>
   <object class="GtkAction" id="preferences_action">
     <property name="label" translatable="yes">Preferences</property>
@@ -90,35 +148,6 @@
     <property name="stock_id">gtk-refresh</property>
     <property name="always_show_image">True</property>
     <signal name="activate" handler="on_refresh_action_activate" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="remove_image_action">
-    <property name="label" translatable="yes">Remove</property>
-    <property name="short_label" translatable="yes">Remove</property>
-    <property name="stock_id">gtk-delete</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_remove_image_action_activate" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="runimage_action">
-    <property name="label" translatable="yes">Run</property>
-    <property name="short_label" translatable="yes">Run</property>
-    <property name="stock_id">gtk-execute</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_runimage_action_activate" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="start_action">
-    <property name="label" translatable="yes">Start</property>
-    <property name="short_label" translatable="yes">Start</property>
-    <property name="tooltip" translatable="yes">Start a selected stopped container.</property>
-    <property name="stock_id">gtk-media-play</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_start_action_activate" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="stop_action">
-    <property name="label" translatable="yes">Stop</property>
-    <property name="short_label" translatable="yes">Stop</property>
-    <property name="stock_id">gtk-media-stop</property>
-    <property name="always_show_image">True</property>
-    <signal name="activate" handler="on_stop_action_activate" swapped="no"/>
   </object>
   <object class="GtkWindow" id="MainWindow">
     <property name="can_focus">False</property>
@@ -285,6 +314,35 @@
                         <property name="position">3</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkSeparator" id="separator1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="DeleteContainerButton">
+                        <property name="label">gtk-delete</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="related_action">delete_container_action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <property name="yalign">0.56999999284744263</property>
+                        <property name="always_show_image">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">5</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -306,8 +364,11 @@
                         <property name="search_column">0</property>
                         <property name="show_expanders">False</property>
                         <property name="enable_grid_lines">both</property>
+                        <signal name="button-press-event" handler="on_ContainerListView_button_press_event" swapped="no"/>
                         <child internal-child="selection">
-                          <object class="GtkTreeSelection" id="treeview-selection1"/>
+                          <object class="GtkTreeSelection" id="container_view_selection">
+                            <signal name="changed" handler="on_container_view_selection_changed" swapped="no"/>
+                          </object>
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="ContainerName">
@@ -415,23 +476,6 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="RemoveImageButton">
-                        <property name="label">gtk-delete</property>
-                        <property name="use_action_appearance">True</property>
-                        <property name="related_action">remove_image_action</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_stock">True</property>
-                        <property name="always_show_image">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkButton" id="RunImageButton">
                         <property name="label">gtk-execute</property>
                         <property name="use_action_appearance">True</property>
@@ -445,7 +489,35 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSeparator" id="separator2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="RemoveImageButton">
+                        <property name="label">gtk-delete</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="related_action">remove_image_action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <property name="always_show_image">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>

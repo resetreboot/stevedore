@@ -1,0 +1,18 @@
+<ui>
+    <popup name='ContainerStoppedPopup'>
+        <menuitem action='start_action' />
+        <menuitem action='log_action' />
+        <separator />
+        <menuitem action='delete_container_action' />
+    </popup>
+    <popup name='ContainerStartedPopup'>
+        <menuitem action='stop_action' />
+        <menuitem action='attach_action' />
+        <menuitem action='log_action' />
+    </popup>
+    <popup name='ImagePopup'>
+        <menuitem action='build_action' />
+        <menuitem action='runimage_action' />
+        <menuitem action='remove_image_action' />
+    </popup>
+</ui>

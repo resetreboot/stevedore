@@ -18,7 +18,7 @@
 # Generated with glade2py script
 # glade2py script can be found at hocr web site http://hocr.berlios.de
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gdk, Gio
 from pkg_resources import resource_string
 from docker_iface import DockerInterface, DockerImage, DockerContainer, DockerNotConnectedException
 
@@ -35,19 +35,31 @@ class MainWindow(Gtk.Application):
         
         # create widget tree ...
         self.builder = Gtk.Builder()
+        self.ui_manager = Gtk.UIManager()
         try:
             self.builder.add_from_file(resource_string(__name__, 'stevedore.glade'))
+            self.ui_manager.add_ui_from_file(resource_string(__name__, 'ui_builder.xml'))
 
         except:
             self.builder.add_from_file('../res/stevedore.glade')
+            self.ui_manager.add_ui_from_file('../res/ui_builder.xml')
 
         # connect handlers
         self.builder.connect_signals(self)
+        self.ui_manager.insert_action_group(self.builder.get_object('ContainerActionGroup'))
+        self.ui_manager.insert_action_group(self.builder.get_object('ImagesActionGroup'))
+
+        # Prepare certain widgets
+        self.status_bar = self.builder.get_object('AppStatus')
+        self.status_context_id = self.status_bar.get_context_id('main_app')
+        self.builder.get_object('StartButton').set_sensitive(False)
+        self.builder.get_object('StopButton').set_sensitive(False)
+        self.builder.get_object('AttachButton').set_sensitive(False)
+        self.builder.get_object('LogButton').set_sensitive(False)
+        self.builder.get_object('DeleteContainerButton').set_sensitive(False)
 
         # Add window to the App and show it
         self.window = self.builder.get_object('MainWindow')
-        self.status_bar = self.builder.get_object('AppStatus')
-        self.status_context_id = self.status_bar.get_context_id('main_app')
         self.add_window(self.window)
         self.window.show()
         self.set_app_status(u'Not connected to Docker server.')
@@ -74,12 +86,14 @@ class MainWindow(Gtk.Application):
         image_list.clear()
 
         # And now we populate them back
-        for container in self.docker.containers:
+        for container_index in self.docker.containers:
+            container = self.docker.get_container_by_id(container_index)
             status = container.return_status_string()
             container_list.append(row = [container.names[0],
                                          unicode(container.image),
                                          unicode(container.container_id)[:12],
-                                         status])
+                                         status,
+                                         unicode(container.container_id)])
 
         for image in self.docker.images:
             size_text = self.size_to_human(image.size)
@@ -213,6 +227,80 @@ class MainWindow(Gtk.Application):
         Launch selected image into a running container
         """
         print "Not implemented: on_runimage_action_activate"
+
+    def on_ContainerListView_button_press_event(self, obj, event = None):
+        """
+        This hook checks the mouse interaction with the ContainerListView
+        """
+        if event is not None:
+            if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
+                container_view = self.builder.get_object('ContainerListView')
+                selection = container_view.get_selection()
+                model, selected = selection.get_selected()
+                # selection is a treeiter
+                if selected is not None:
+                    selected_container_id = model[selected][4]
+                    container = self.docker.get_container_by_id(selected_container_id)
+
+                    if container is not None:
+                        if container.status == DockerContainer.EXITED:
+                            popup = self.ui_manager.get_widget('/ContainerStoppedPopup')
+
+                        elif container.status == DockerContainer.UP:
+                            popup = self.ui_manager.get_widget('/ContainerStartedPopup')
+
+                        else:
+                            popup = self.ui_manager.get_widget('/ContainerStoppedPopup')
+
+                popup.popup(None, None, None, None, event.button, event.time)
+                return True
+
+    def on_container_view_selection_changed(self, selection):
+        """
+        We control which element is selected on the ContainerListView to enable and disable
+        certain button actions
+        """
+        start_button = self.builder.get_object('StartButton')
+        stop_button = self.builder.get_object('StopButton')
+        attach_button = self.builder.get_object('AttachButton')
+        log_button = self.builder.get_object('LogButton')
+        delete_container_button = self.builder.get_object('DeleteContainerButton')
+
+        model, treeiter = selection.get_selected()
+        if treeiter is not None:
+            container_id = model[treeiter][4]
+            container = self.docker.get_container_by_id(container_id)
+
+            if container.status == DockerContainer.UP:
+                start_button.set_sensitive(False)
+                stop_button.set_sensitive(True)
+                attach_button.set_sensitive(True)
+                log_button.set_sensitive(True)
+                delete_container_button.set_sensitive(False)
+
+            elif container.status == DockerContainer.EXITED:
+                start_button.set_sensitive(True)
+                stop_button.set_sensitive(False)
+                attach_button.set_sensitive(False)
+                log_button.set_sensitive(True)
+                delete_container_button.set_sensitive(True)
+
+            else:
+                start_button.set_sensitive(False)
+                stop_button.set_sensitive(False)
+                attach_button.set_sensitive(False)
+                log_button.set_sensitive(True)
+                delete_container_button.set_sensitive(True)
+
+        else:
+            start_button.set_sensitive(False)
+            stop_button.set_sensitive(False)
+            attach_button.set_sensitive(False)
+            log_button.set_sensitive(False)
+            delete_container_button.set_sensitive(False)
+
+
+
 
 
 # run main loop
