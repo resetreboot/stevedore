@@ -143,6 +143,31 @@ class MainWindow(Gtk.Application):
         """
         pass
 
+    def on_PreferencesWindow_delete_event(self, obj, event = None):
+        """
+        The Preferences window has been closed by clicking the close window
+        button from the window manager
+        
+        obj -- 
+        event -- 
+        """
+        preferences_window = self.builder.get_object('PreferencesWindow')
+        preferences_window.hide()
+
+        # TODO: Save the preferences
+        return True
+
+    def on_PrefsCloseButton_clicked(self, obj, event = None):
+        """
+        The close button at the preferences has been pressed
+        
+        obj -- 
+        event -- 
+        """
+        preferences_window = self.builder.get_object('PreferencesWindow')
+        preferences_window.hide()
+        # TODO: Save the preferences
+
     ### Action callbacks ###
 
     def on_connect_action_activate(self, obj, event = None):
@@ -169,8 +194,10 @@ class MainWindow(Gtk.Application):
         """
         We've been asked for the preferences window
         """
-        # TODO
-        print "Not implemented: on_preferences_action_activate"
+        preferences_window = self.builder.get_object('PreferencesWindow')
+
+        # TODO: Set up the window to the current preferences before showing it up
+        preferences_window.show()
 
     def on_refresh_action_activate(self, obj, event = None):
         """
@@ -323,6 +350,7 @@ class MainWindow(Gtk.Application):
             attach_button.set_sensitive(False)
             log_button.set_sensitive(False)
             delete_container_button.set_sensitive(False)
+
 
 
 # run main loop
