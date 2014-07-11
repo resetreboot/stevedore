@@ -238,6 +238,19 @@ class DockerInterface(object):
         else:
             raise DockerNotConnectedException()
 
+    def remove_container(self, container_id):
+        '''
+        Removes a container based on it's ID.
+        
+        @param container_id: ID of the container to remove
+        @type container_id: String
+        '''
+        if self.client is not None:
+            self.client.remove_container(container_id)
+
+        else:
+            raise DockerNotConnectedException()
+
 
 class DockerNotConnectedException(Exception):
     pass

@@ -213,7 +213,25 @@ class MainWindow(Gtk.Application):
         """
         User wants to delete a selected container
         """
-        print "Not implemented: on_delete_container_action_activate"
+        container_view = self.builder.get_object('ContainerListView')
+        selection = container_view.get_selection()
+        model, selected = selection.get_selected()
+        # selection is a treeiter
+        if selected is not None:
+            selected_container_id = model[selected][4]
+            container = self.docker.get_container_by_id(selected_container_id)
+
+            if container is not None:
+                message_dialog = Gtk.MessageDialog(self.window, 0, 
+                                                   Gtk.MessageType.QUESTION,
+                                                   Gtk.ButtonsType.YES_NO,
+                                                   "Are you sure you want to remove {name} container?".format(name = container.names[0]))
+                response = message_dialog.run()
+                if response == Gtk.ResponseType.YES:
+                    self.docker.remove_container(container.container_id)
+                    self.refresh_views()
+
+                message_dialog.destroy()
 
     def on_build_action_activate(self, obj, event = None):
         """
