@@ -252,8 +252,9 @@ class MainWindow(Gtk.Application):
                         else:
                             popup = self.ui_manager.get_widget('/ContainerStoppedPopup')
 
-                popup.popup(None, None, None, None, event.button, event.time)
-                return True
+                        popup.popup(None, None, None, None, event.button, event.time)
+
+                        return True
 
     def on_container_view_selection_changed(self, selection):
         """
@@ -298,9 +299,6 @@ class MainWindow(Gtk.Application):
             attach_button.set_sensitive(False)
             log_button.set_sensitive(False)
             delete_container_button.set_sensitive(False)
-
-
-
 
 
 # run main loop
