@@ -47,6 +47,7 @@
         <property name="tooltip" translatable="yes">Delete the selected container.</property>
         <property name="stock_id">gtk-delete</property>
         <property name="always_show_image">True</property>
+        <signal name="activate" handler="on_delete_container_action_activate" swapped="no"/>
       </object>
     </child>
   </object>

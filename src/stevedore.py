@@ -209,6 +209,12 @@ class MainWindow(Gtk.Application):
         # anyway.
         print "Not implemented: on_log_action_activate"
 
+    def on_delete_container_action_activate(self, obj, event = None):
+        """
+        User wants to delete a selected container
+        """
+        print "Not implemented: on_delete_container_action_activate"
+
     def on_build_action_activate(self, obj, event = None):
         """
         Command for building new images from Dockerfiles
