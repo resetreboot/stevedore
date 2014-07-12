@@ -18,13 +18,17 @@
 import os
 import os.path
 
-class Preferences(object):
+class Preferences(dict):
     """
     This class allows us to control and maintain preferences and
     store them
     """
     def __init__(self):
-        self.options = dict()
+        self._options = dict()
+        self._header = "# Stevedore configuration file\n# This file may be overwritten by the program itself\n"
+        home_directory = os.path.expanduser('~')
+        self._directory = os.path.join(home_directory, '.config/stevedore')
+        self._filename = 'main.conf'
         try:
             self.load_preferences()
 
@@ -37,14 +41,11 @@ class Preferences(object):
         """
         Loads the preferences from the default filename
         """
-        with open('~/.config/stevedore/main.conf', 'r') as f:
+        with open(os.path.join(self._directory, self._filename), 'r') as f:
             for line in f:
                 if line[0] != '#':
                     try:
-                        option = line.split('=')[0].trim()
-                        value = line.split('=')[1].trim()
-
-                        self.options[option] = value
+                        self._set_config_from_string(line)
 
                     except Exception as e:
                         # for debugging purposes
@@ -56,15 +57,117 @@ class Preferences(object):
         """
         If we don't have any preferences file, we create it
         """
-        if not os.path.isdir('~/.config/stevedore'):
+        if not os.path.isdir(self._directory):
             # We create the directory
-            os.mkdir('~/.config/stevedore')
+            os.mkdir(self._directory)
+
+        if not os.path.exists(os.path.join(self._directory, self._filename)):
             self.set_default_options()
             self.save_preferences()
 
+    def set_default_options(self):
+        """
+        Set preferences to the defaults
+        """
+        self._options['localhost'] = True
+        self._options['host'] = 'localhost'
+        self._options['port'] = 0
 
+        self._header = "# Default options for stevedore.\n# This file may be overwritten from the program itself\n"
 
+    def save_preferences(self):
+        """
+        Stores the preferences into a file
+        """
+        try:
+            prefs_file = open(os.path.join(self._directory, self._filename), 'w')
 
+        except IOError as e:
+            # Debugging
+            print "Creating new preferences file"
+            self.create_preferences()
+            prefs_file = open(os.path.join(self._directory, self._filename), 'w')
 
+        prefs_file.write(self._header + "\n")
 
+        for key in self._options:
+            line = self._get_config_string(key)
+            if line != "":
+                prefs_file.write(line + "\n")
 
+        prefs_file.close()
+
+    def _get_config_string(self, key):
+        """
+        Turns an option key into a string for the config file
+        """
+        value = self._options.get(key, None)
+        if value is None:
+            return ""
+
+        else:
+            return key + " = " + str(value)
+
+    def _set_config_from_string(self, config_line):
+        """
+        Turns an option line into an option
+        """
+        line_split = config_line.split('=')
+        try:
+            key = line_split[0].strip()
+            val = line_split[1].strip()
+
+        except:
+            return
+
+        if val.isdigit():
+            value = int(val)
+
+        elif val == 'True':
+            value = True
+
+        elif val == 'False':
+            value = False
+
+        else:
+            value = val
+
+        self._options[key] = value
+
+    def __setitem__(self, key, value):
+        """
+        Safe option setting
+        """
+        if type(value) == str or type(value) == unicode:
+            if value == 'True':
+                value = True
+
+            elif value == 'False':
+                value = False
+
+            elif value.isdigit():
+                value = int(value)
+
+        self._options[key] = value
+
+    def __getitem__(self, key):
+        """
+        Return an option value safely. None if it does not exist.
+        """
+        return self._options.get(key, None)
+
+    def __len__(self):
+        """
+        Return the number of current options
+        """
+        return len(self._options)
+
+    def __delitem__(self, key):
+        """
+        Delete an option
+        """
+        try:
+            del(self._options[key])
+
+        except:
+            pass
