@@ -20,7 +20,9 @@
 
 from gi.repository import Gtk, Gdk, Gio
 from pkg_resources import resource_string
+
 from docker_iface import DockerInterface, DockerImage, DockerContainer, DockerNotConnectedException
+from prefs import Preferences
 
 import time
 
@@ -57,6 +59,9 @@ class MainWindow(Gtk.Application):
         self.builder.get_object('AttachButton').set_sensitive(False)
         self.builder.get_object('LogButton').set_sensitive(False)
         self.builder.get_object('DeleteContainerButton').set_sensitive(False)
+
+        # Get the preferences ready
+        self.preferences = Preferences()
 
         # Add window to the App and show it
         self.window = self.builder.get_object('MainWindow')
@@ -155,7 +160,7 @@ class MainWindow(Gtk.Application):
         """
         The main window is deleted
         """
-        pass
+        self.preferences.save_preferences()
 
     def on_PreferencesWindow_delete_event(self, obj, event = None):
         """
@@ -168,7 +173,6 @@ class MainWindow(Gtk.Application):
         preferences_window = self.builder.get_object('PreferencesWindow')
         preferences_window.hide()
 
-        # TODO: Save the preferences
         return True
 
     def on_PrefsCloseButton_clicked(self, obj, event = None):
@@ -180,7 +184,6 @@ class MainWindow(Gtk.Application):
         """
         preferences_window = self.builder.get_object('PreferencesWindow')
         preferences_window.hide()
-        # TODO: Save the preferences
 
     ### Action callbacks ###
 
@@ -215,8 +218,32 @@ class MainWindow(Gtk.Application):
         We've been asked for the preferences window
         """
         preferences_window = self.builder.get_object('PreferencesWindow')
+        localhost_checkbox = self.builder.get_object('LocalCheckBox')
+        hostname_entry = self.builder.get_object('HostnameEntry')
+        port_entry = self.builder.get_object('PortEntry')
 
-        # TODO: Set up the window to the current preferences before showing it up
+        # Set up the window to the current preferences before showing it up
+        if self.preferences['localhost']:
+            # We're connecting to a local instance
+            localhost_checkbox.set_active(True)
+
+            hostname_entry.set_text('')
+            hostname_entry.set_editable(False)
+
+            port_entry.set_text('')
+            port_entry.set_editable(False)
+
+        else:
+            # We're connecting to a remote instance
+            localhost_checkbox.set_active(False)
+
+            hostname_entry.set_text(self.preferences['host'])
+            hostname_entry.set_editable(True)
+
+            port_entry.set_text(unicode(self.preferences['port']))
+            port_entry.set_editable(True)
+
+        # Now we show up our preferences window
         preferences_window.show()
 
     def on_refresh_action_activate(self, obj, event = None):
@@ -371,6 +398,61 @@ class MainWindow(Gtk.Application):
             log_button.set_sensitive(False)
             delete_container_button.set_sensitive(False)
 
+    # Preferences window callbacks
+    def on_LocalCheckBox_toggled(self, obj, data = None):
+        """
+        The checkbox has been changed
+        """
+        localhost_checkbox = self.builder.get_object('LocalCheckBox')
+        hostname_entry = self.builder.get_object('HostnameEntry')
+        port_entry = self.builder.get_object('PortEntry')
+
+        if localhost_checkbox.get_active():
+            hostname_entry.set_text('')
+            hostname_entry.set_editable(False)
+
+            port_entry.set_text('')
+            port_entry.set_editable(False)
+
+        else:
+            hostname_entry.set_text(self.preferences['host'])
+            hostname_entry.set_editable(True)
+
+            port_entry.set_text(unicode(self.preferences['port']))
+            port_entry.set_editable(True)
+
+        self.get_preferences_from_window()
+
+    def on_PortEntry_changed(self, obj, data = None):
+        """
+        The port entry has been changed
+        """
+        self.get_preferences_from_window()
+
+    def on_HostnameEntry_changed(self, obj, data = None):
+        """
+        The hostname entry has been changed
+        """
+        self.get_preferences_from_window()
+
+    def get_preferences_from_window(self):
+        """
+        Gets the current Preferences window widgets and saves the options
+        """
+        localhost_checkbox = self.builder.get_object('LocalCheckBox')
+        hostname_entry = self.builder.get_object('HostnameEntry')
+        port_entry = self.builder.get_object('PortEntry')
+
+        if localhost_checkbox.get_active():
+            self.preferences['localhost'] = True
+            self.preferences['host'] = 'localhost'
+            self.preferences['port'] = 0
+
+        else:
+            self.preferences['localhost'] = False
+            self.preferences['host'] = hostname_entry.get_text()
+            if port_entry.get_text() != '':
+                self.preferences['port'] = int(port_entry.get_text())
 
 
 # run main loop
