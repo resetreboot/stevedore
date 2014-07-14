@@ -27,7 +27,7 @@ from prefs import Preferences
 import time
 
 
-class MainWindow(Gtk.Application):
+class MainApplication(Gtk.Application):
     def __init__(self):
         Gtk.Application.__init__(self, application_id = "apps.gnome.stevedore",
                                  flags = Gio.ApplicationFlags.FLAGS_NONE)
@@ -153,6 +153,25 @@ class MainWindow(Gtk.Application):
             pass
 
         self.status_bar.push(self.status_context_id, message)
+
+    def get_preferences_from_window(self):
+        """
+        Gets the current Preferences window widgets and saves the options
+        """
+        localhost_checkbox = self.builder.get_object('LocalCheckBox')
+        hostname_entry = self.builder.get_object('HostnameEntry')
+        port_entry = self.builder.get_object('PortEntry')
+
+        if localhost_checkbox.get_active():
+            self.preferences['localhost'] = True
+            self.preferences['host'] = 'localhost'
+            self.preferences['port'] = 0
+
+        else:
+            self.preferences['localhost'] = False
+            self.preferences['host'] = hostname_entry.get_text()
+            if port_entry.get_text() != '':
+                self.preferences['port'] = int(port_entry.get_text())
 
     # Events and "natural" callbacks
 
@@ -435,30 +454,11 @@ class MainWindow(Gtk.Application):
         """
         self.get_preferences_from_window()
 
-    def get_preferences_from_window(self):
-        """
-        Gets the current Preferences window widgets and saves the options
-        """
-        localhost_checkbox = self.builder.get_object('LocalCheckBox')
-        hostname_entry = self.builder.get_object('HostnameEntry')
-        port_entry = self.builder.get_object('PortEntry')
-
-        if localhost_checkbox.get_active():
-            self.preferences['localhost'] = True
-            self.preferences['host'] = 'localhost'
-            self.preferences['port'] = 0
-
-        else:
-            self.preferences['localhost'] = False
-            self.preferences['host'] = hostname_entry.get_text()
-            if port_entry.get_text() != '':
-                self.preferences['port'] = int(port_entry.get_text())
-
 
 # run main loop
 def main():
-    main_window = MainWindow()
-    main_window.run(None)
+    main_app = MainApplication()
+    main_app.run(None)
 
 if __name__ == "__main__":
     main()
